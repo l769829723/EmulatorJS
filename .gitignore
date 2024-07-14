@@ -4,6 +4,5 @@ data/minify/package-lock.json
 package-lock.json
 yarn.lock
 roms/
-data/cores
 .DS_Store
 .vscode/*
