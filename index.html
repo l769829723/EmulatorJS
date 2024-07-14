@@ -115,7 +115,7 @@
             console.log("Threads are disabled");
         }
 
-        const loadGame = async (fileName, content) => {
+        const loadGame = async ({ fileName, content, settings }) => {
             const parts = fileName.split(".")
             console.log("file parts: ", parts);
             console.log("file content: ", content);
@@ -213,12 +213,38 @@
 
             const top = document.getElementById("top");
             top.remove();
-            div.appendChild(sub)
-            document.body.appendChild(div)
+            div.appendChild(sub);
+            document.body.appendChild(div);
 
-            window.EJS_player = "#game";
             window.EJS_gameName = parts.shift();
             window.EJS_biosUrl = "";
+            window.EJS_Buttons = {
+                playPause: false,
+                restart: false,
+                mute: false,
+                settings: false,
+                fullscreen: true,
+                saveState: false,
+                loadState: false,
+                screenRecord: false,
+                gamepad: true,
+                cheat: false,
+                volume: true,
+                saveSavFiles: true,
+                loadSavFiles: true,
+                quickSave: false,
+                quickLoad: false,
+                screenshot: false,
+                cacheManager: false
+            };
+
+
+            // 更新模拟器设置
+            // for (let [key, value] of Object.entries(settings)) {
+            //     window[key] = value;
+            // }
+
+            window.EJS_player = "#game";
             window.EJS_gameUrl = content;
             window.EJS_core = core;
             window.EJS_pathtodata = "data/";
@@ -231,11 +257,23 @@
             document.body.appendChild(script);
         }
 
+        const parseSettings = () => {
+            try {
+                const codedSettings = decodeURI(urlParams.get('settings') || "{}");
+                return JSON.parse(codedSettings);
+            } catch (error) {
+                console.error("Invalid settings", error);
+                return {}
+            }
+        }
+
         window.addEventListener("DOMContentLoaded", () => {
             const startBtn = document.getElementById("start-btn");
             startBtn.addEventListener("click", () => {
                 this.remove;
                 const romUrl = urlParams.get('romUrl');
+                const settings = parseSettings();
+
                 if (romUrl) {
                     const pathname = new URL(romUrl).pathname;
 
@@ -244,7 +282,7 @@
                             const data = await res.arrayBuffer();
                             const content = new Blob([data]);
                             const filename = pathname.split('/').pop();
-                            loadGame(decodeURI(filename), content);
+                            loadGame({ fileName: decodeURI(filename), content, settings });
                         }
                     });
                 }
